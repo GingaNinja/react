@@ -173,6 +173,35 @@ func parseDiv(n *html.Node) *react.DivElem {
 	return react.Div(vp, kids...)
 }
 
+func parseTable(n *html.Node) *react.TableElem {
+	var kids []react.Element
+
+	var vp *react.TableProps
+
+	if len(n.Attr) > 0 {
+		vp = new(react.TableProps)
+
+		for _, a := range n.Attr {
+			switch a.Key {
+			case "id":
+				vp.ID = a.Val
+			case "classname":
+				vp.ClassName = a.Val
+			case "style":
+				vp.Style = parseCSS(a.Val)
+			default:
+				panic(fmt.Errorf("don't know how to handle <table> attribute %q", a.Key))
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		kids = append(kids, parse(c))
+	}
+
+	return react.Table(vp, kids...)
+}
+
 func parseButton(n *html.Node) *react.ButtonElem {
 	var kids []react.Element
 
@@ -350,6 +379,8 @@ func parse(n *html.Node) react.Element {
 		return parseButton(n)
 	case "i":
 		return parseI(n)
+	case "table":
+		return parseTable(n)
 	default:
 		panic(fmt.Errorf("cannot handle Element %v", n.Data))
 	}
