@@ -231,6 +231,64 @@ func parseThead(n *html.Node) *react.TheadElem {
 	return react.Thead(vp, kids...)
 }
 
+func parseTr(n *html.Node) *react.TrElem {
+	var kids []react.Element
+
+	var vp *react.TrProps
+
+	if len(n.Attr) > 0 {
+		vp = new(react.TrProps)
+
+		for _, a := range n.Attr {
+			switch a.Key {
+			case "id":
+				vp.ID = a.Val
+			case "classname":
+				vp.ClassName = a.Val
+			case "style":
+				vp.Style = parseCSS(a.Val)
+			default:
+				panic(fmt.Errorf("don't know how to handle <tr> attribute %q", a.Key))
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		kids = append(kids, parse(c))
+	}
+
+	return react.Tr(vp, kids...)
+}
+
+func parseTh(n *html.Node) *react.ThElem {
+	var kids []react.Element
+
+	var vp *react.ThProps
+
+	if len(n.Attr) > 0 {
+		vp = new(react.ThProps)
+
+		for _, a := range n.Attr {
+			switch a.Key {
+			case "id":
+				vp.ID = a.Val
+			case "classname":
+				vp.ClassName = a.Val
+			case "style":
+				vp.Style = parseCSS(a.Val)
+			default:
+				panic(fmt.Errorf("don't know how to handle <th> attribute %q", a.Key))
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		kids = append(kids, parse(c))
+	}
+
+	return react.Th(vp, kids...)
+}
+
 func parseButton(n *html.Node) *react.ButtonElem {
 	var kids []react.Element
 
@@ -412,6 +470,10 @@ func parse(n *html.Node) react.Element {
 		return parseTable(n)
 	case "thead":
 		return parseThead(n)
+	case "tr":
+		return parseTr(n)
+	case "th":
+		return parseTh(n)
 	default:
 		panic(fmt.Errorf("cannot handle Element %v", n.Data))
 	}
