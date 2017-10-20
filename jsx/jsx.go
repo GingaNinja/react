@@ -202,6 +202,35 @@ func parseTable(n *html.Node) *react.TableElem {
 	return react.Table(vp, kids...)
 }
 
+func parseThead(n *html.Node) *react.TheadElem {
+	var kids []react.Element
+
+	var vp *react.TheadProps
+
+	if len(n.Attr) > 0 {
+		vp = new(react.TheadProps)
+
+		for _, a := range n.Attr {
+			switch a.Key {
+			case "id":
+				vp.ID = a.Val
+			case "classname":
+				vp.ClassName = a.Val
+			case "style":
+				vp.Style = parseCSS(a.Val)
+			default:
+				panic(fmt.Errorf("don't know how to handle <thead> attribute %q", a.Key))
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		kids = append(kids, parse(c))
+	}
+
+	return react.Thead(vp, kids...)
+}
+
 func parseButton(n *html.Node) *react.ButtonElem {
 	var kids []react.Element
 
@@ -381,6 +410,8 @@ func parse(n *html.Node) react.Element {
 		return parseI(n)
 	case "table":
 		return parseTable(n)
+	case "thead":
+		return parseThead(n)
 	default:
 		panic(fmt.Errorf("cannot handle Element %v", n.Data))
 	}
