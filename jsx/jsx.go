@@ -289,6 +289,35 @@ func parseTh(n *html.Node) *react.ThElem {
 	return react.Th(vp, kids...)
 }
 
+func parseTd(n *html.Node) *react.TdElem {
+	var kids []react.Element
+
+	var vp *react.TdProps
+
+	if len(n.Attr) > 0 {
+		vp = new(react.TdProps)
+
+		for _, a := range n.Attr {
+			switch a.Key {
+			case "id":
+				vp.ID = a.Val
+			case "classname":
+				vp.ClassName = a.Val
+			case "style":
+				vp.Style = parseCSS(a.Val)
+			default:
+				panic(fmt.Errorf("don't know how to handle <td> attribute %q", a.Key))
+			}
+		}
+	}
+
+	for c := n.FirstChild; c != nil; c = c.NextSibling {
+		kids = append(kids, parse(c))
+	}
+
+	return react.Td(vp, kids...)
+}
+
 func parseButton(n *html.Node) *react.ButtonElem {
 	var kids []react.Element
 
@@ -474,6 +503,8 @@ func parse(n *html.Node) react.Element {
 		return parseTr(n)
 	case "th":
 		return parseTh(n)
+	case "td":
+		return parseTd(n)
 	default:
 		panic(fmt.Errorf("cannot handle Element %v", n.Data))
 	}
